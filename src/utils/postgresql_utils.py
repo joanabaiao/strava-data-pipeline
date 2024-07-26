@@ -16,32 +16,6 @@ def connect_postgresql(config):
         
     return conn
 
-
-
-def get_last_updated_date(config):
-    
-    query = """
-        SELECT COALESCE(MAX(LastUpdated), '1900-01-01')
-        FROM last_extracted;
-    """
-    
-    try:
-        conn = connect_postgresql(config)
-        cur = conn.cursor()
-        cur.execute(query)
-        
-        result = cur.fetchone()
-        last_updated_date = result[0] if result else '1900-01-01'
-        last_updated_date = last_updated_date.strftime("%Y-%m-%d %H:%M:%S")
-
-        cur.close()
-        conn.close()
-        
-        return last_updated_date
-    
-    except Exception as e:
-        print(f"An error occurred: {e}")
- 
  
 def insert_current_extraction_date(config):
     
