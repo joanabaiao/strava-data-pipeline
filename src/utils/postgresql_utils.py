@@ -17,26 +17,4 @@ def connect_postgresql(config):
     return conn
 
  
-def insert_current_extraction_date(config):
-    
-    current_date = datetime.now().strftime('%Y-%m-%d')
-    query = """
-        INSERT INTO last_extracted (LastUpdated)
-        VALUES (%s);
-    """
-    
-    try:
-        conn = connect_postgresql(config)
-        cur = conn.cursor()
-        cur.execute(query, (current_date,))
-        conn.commit()
-        
-        cur.close()
-        conn.close()
-
-        print(f"Inserted current date {current_date} into last_extracted table.")
-        
-    except Exception as e:
-        print(f"An error occurred: {e}")
-        
         
