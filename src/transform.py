@@ -25,8 +25,19 @@ def process_data(data):
     data = data.drop_duplicates()
     
     # Convert dates to date format
-    data['start_date'] = pd.to_datetime(data['start_date'])
-    data['start_date_local'] = pd.to_datetime(data['start_date_local'])
+    data['start_date'] = pd.to_datetime(data['start_date']).dt.tz_localize(None)
+    data['start_date_local'] = pd.to_datetime(data['start_date_local']).dt.tz_localize(None)
+    
+    # Rename columns
+    columns_to_rename = {
+        'athlete.id': 'athlete_id',
+        'athlete.resource_state': 'athlete_resource_state',
+        'map.id': 'map_id',
+        'map.summary_polyline': 'map_summary_polyline',
+        'map.resource_state': 'map_resource_state'
+    }
+    data.rename(columns=columns_to_rename, inplace=True)
+
 
     return data
 
