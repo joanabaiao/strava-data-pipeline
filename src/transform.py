@@ -1,4 +1,6 @@
 import pandas as pd 
+import ast
+import json
 from extract import extract
 
 def check_data_quality(data):
@@ -15,14 +17,38 @@ def check_data_quality(data):
     else:
         print("Primary Key Exception: Duplicate values found in 'id' column.")
         return False
+  
     
+def convert_to_list(element):
+    if element is None:
+        return []
+    if isinstance(element, str):
+        try:
+            element = ast.literal_eval(element)
+        except (ValueError, SyntaxError):
+            return []
+    return element
+
+def array_to_json(coord_array):
     
+    if len(coord_array) < 2:
+        return json.dumps({"lat": None, "lng": None})
+    else:
+        try:
+            lat = float(coord_array[0])
+            lng = float(coord_array[1])
+        except (ValueError, TypeError):
+            return json.dumps({"lat": None, "lng": None})
+    
+    return json.dumps({"lat": lat, "lng": lng})
+    
+
 def process_data(data):
     
-    data = data.copy()
-    
-    # Drop duplicate rows
-    data = data.drop_duplicates()
+    # Convert array to JSON
+    for col in ['start_latlng', 'end_latlng']:
+        data[col] = data[col].apply(convert_to_list)
+        data[col] = data[col].apply(array_to_json)
     
     # Convert dates to date format
     data['start_date'] = pd.to_datetime(data['start_date']).dt.tz_localize(None)
@@ -37,27 +63,27 @@ def process_data(data):
         'map.resource_state': 'map_resource_state'
     }
     data.rename(columns=columns_to_rename, inplace=True)
-
-
+    
     return data
 
 
 ########################################################
 
-def transform(all_activities):
+def transform(df_activities):
     
-    data = pd.json_normalize(all_activities)
-    
-    if all_activities:
-        data = process_data(data)
-        
-    return data
+    if check_data_quality(df_activities):
+        df_activities_transformed = process_data(df_activities) 
+        return df_activities_transformed
+
+    else:
+        print("Data quality check failed.")
+        return pd.DataFrame() 
+
 
 if __name__ == "__main__":
     
-    all_activities = extract()
-    data = pd.json_normalize(all_activities)
+    df_activities = extract()
     
-    if check_data_quality(data):
-        data = process_data(data)
+    if check_data_quality(df_activities):
+        data = process_data(df_activities)
         

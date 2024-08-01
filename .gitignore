@@ -164,3 +164,4 @@ cython_debug/
 logs/*
 config.yaml
 dags/data/*
+data/*

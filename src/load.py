@@ -1,7 +1,6 @@
 import pandas as pd
 from datetime import datetime
 
-from utils.postgresql_utils import * 
 from utils.utils import *
 import psycopg2.extras as extras 
 

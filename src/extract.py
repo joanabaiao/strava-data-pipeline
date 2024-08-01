@@ -1,8 +1,6 @@
 import pandas as pd
 from datetime import datetime
 
-from utils.strava_utils import * 
-from utils.postgresql_utils import * 
 from utils.utils import *
 
 def get_last_updated_date(config):
@@ -55,7 +53,7 @@ def extract_strava_activities(activities_url, header, activities_per_page, last_
 
             filtered_activities = [
                 activity for activity in activities
-                if datetime.datetime.fromisoformat(activity['start_date'].replace('Z', '+00:00')).strftime('%Y-%m-%d %H:%M:%S') > last_updated_date
+                if datetime.fromisoformat(activity['start_date'].replace('Z', '+00:00')).strftime('%Y-%m-%d %H:%M:%S') > last_updated_date
             ]     
                                  
             # Append the new activities to the all_activities list
@@ -83,10 +81,14 @@ def extract():
     last_updated_date = get_last_updated_date(config)
     all_activities = extract_strava_activities(activities_url, header, activities_per_page, last_updated_date)
     
-    if all_activities:
-        save_data_to_csv(all_activities)
-        
-    return all_activities
+    if not all_activities:
+        print("No new activities found.")
+        return pd.DataFrame() 
+    
+    df_activities = pd.json_normalize(all_activities)
+    save_data_to_csv(df_activities)
+    
+    return df_activities
     
 
 if __name__ == "__main__": 
