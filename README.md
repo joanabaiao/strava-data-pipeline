@@ -57,6 +57,9 @@ This repository contains a pipeline to extract activity data from the Strava API
    - Follow the official [Running Airflow in Docker guide](https://airflow.apache.org/docs/apache-airflow/stable/howto/docker-compose/index.html).
 
    ```bash
+   mkdir -p ./dags ./logs ./plugins ./config
+   echo -e "AIRFLOW_UID=$(id -u)" > .env
+
    docker compose up airflow-init
    docker compose up
    ```
@@ -69,7 +72,7 @@ This repository contains a pipeline to extract activity data from the Strava API
 
    - From the Airflow web interface, you can manually trigger the `strava_pipeline_DAG` DAG and let it run according to the schedule defined in the DAG configuration.
 
-<img src="images/dag.png" alt="DAG" width="500"/>
+<img src="images/etl_dag.png" alt="DAG" width="500"/>
 
 ### Run Pipeline Manually
 
