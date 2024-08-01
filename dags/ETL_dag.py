@@ -62,7 +62,12 @@ with DAG(
     start_date=days_ago(1),
 ) as dag:
     
-    # Define the PythonOperator task
+    task_create_tables = PostgresOperator(
+        task_id='create_tables',
+        postgres_conn_id='postgres_localhost',
+        sql='sql/schema.sql'
+    )
+    
     task_extract = PythonOperator(
         task_id='extract_strava_data',
         python_callable=extract_task_function,
@@ -78,6 +83,5 @@ with DAG(
         python_callable=load_task_function,
     )
 
-
-    task_extract >> task_transform >> task_load
+    task_create_tables >> task_extract >> task_transform >> task_load
   
