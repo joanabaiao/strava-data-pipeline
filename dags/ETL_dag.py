@@ -7,6 +7,7 @@ from airflow.utils.dates import days_ago
 
 from extract import extract
 from transform import transform
+from load import load
 
 ##############################################
 # Task functions
@@ -16,7 +17,7 @@ def extract_task_function(**kwargs):
     kwargs['ti'].xcom_push(key='dataframe', value=df_activities) # Push the DataFrame to XCom
     
     print(f"Activities DataFrame:\n{df_activities.head()}")
-    
+
 def transform_task_function(**kwargs):
     ti = kwargs['ti']
     
@@ -30,7 +31,19 @@ def transform_task_function(**kwargs):
     # Push the transformed DataFrame to XCom
     ti.xcom_push(key='dataframe', value=df_activities_transformed)
     
+def load_task_function(**kwargs):
+    ti = kwargs['ti']
     
+    # Pull the transformed DataFrame from XCom
+    df_activities_transformed = ti.xcom_pull(task_ids='transform_strava_data', key='dataframe')
+    
+    if df_activities_transformed is not None:
+        load(df_activities_transformed)
+        print("LOADED")
+    else:
+        print("No data retrieved from XCom")
+     
+
 ##############################################
 # Define DAG
 ##############################################
@@ -49,6 +62,7 @@ with DAG(
     start_date=days_ago(1),
 ) as dag:
     
+    # Define the PythonOperator task
     task_extract = PythonOperator(
         task_id='extract_strava_data',
         python_callable=extract_task_function,
@@ -59,4 +73,11 @@ with DAG(
         python_callable=transform_task_function,
     )
     
-    task_extract >> task_transform
+    task_load = PythonOperator(
+        task_id='load_strava_data',
+        python_callable=load_task_function,
+    )
+
+
+    task_extract >> task_transform >> task_load
+  
