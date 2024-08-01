@@ -58,8 +58,8 @@ default_args = {
 with DAG(
     dag_id='strava_pipeline_DAG',
     default_args=default_args,
-    schedule_interval=None,  # Adjust the schedule interval as needed
-    start_date=days_ago(1),
+    schedule_interval='@weekly',  # Adjust the schedule interval as needed
+    start_date=datetime(2024, 8, 1),
 ) as dag:
     
     task_create_tables = PostgresOperator(
