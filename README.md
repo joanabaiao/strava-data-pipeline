@@ -78,3 +78,11 @@ To run the pipeline manually without using Airflow, execute the following comman
 ```bash
 python main.py
 ```
+
+## Conclusion
+
+In summary, I've created a data pipeline that automatically extracts, transforms and loads my Strava data every week.
+
+As the next step, I plan to build an interactive dashboard to further analyze my activity data.
+
+I hope you found this project interesting! Your feedback is highly appreciated and will help guide future improvements :)
