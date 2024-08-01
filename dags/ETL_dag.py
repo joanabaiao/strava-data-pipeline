@@ -6,6 +6,7 @@ from airflow.operators.python import PythonOperator
 from airflow.utils.dates import days_ago
 
 from extract import extract
+from transform import transform
 
 ##############################################
 # Task functions
@@ -16,6 +17,18 @@ def extract_task_function(**kwargs):
     
     print(f"Activities DataFrame:\n{df_activities.head()}")
     
+def transform_task_function(**kwargs):
+    ti = kwargs['ti']
+    
+    # Pull the DataFrame from XCom
+    df_activities = ti.xcom_pull(task_ids='extract_strava_data', key='dataframe')
+    
+    # Transform step
+    df_activities_transformed = transform(df_activities)
+    print(f"Transformed DataFrame:\n{df_activities_transformed.head()}")
+        
+    # Push the transformed DataFrame to XCom
+    ti.xcom_push(key='dataframe', value=df_activities_transformed)
     
     
 ##############################################
@@ -36,8 +49,14 @@ with DAG(
     start_date=days_ago(1),
 ) as dag:
     
-    # Define the PythonOperator task
     task_extract = PythonOperator(
         task_id='extract_strava_data',
         python_callable=extract_task_function,
     )
+    
+    task_transform = PythonOperator(
+        task_id='transform_strava_data',
+        python_callable=transform_task_function,
+    )
+    
+    task_extract >> task_transform
